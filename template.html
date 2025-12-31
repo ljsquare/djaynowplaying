@@ -1,0 +1,232 @@
+
+    <!-- DjayNowplaying - Now Playing display for djay by Algoriddim
+    Template HTML file
+    aurthor: stanzas
+    added: 2025-12-31
+    Copyright (c) 2025 stanzas
+    License: MIT -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DjayNowplaying</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        .now-playing-card {
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            transition: transform 0.3s ease;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .artwork-container {
+            width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background-color: #111;
+            display: none; /* Hidden by default */
+        }
+        .artwork-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-playing { background-color: #00e676; color: #000; }
+        .status-preview { background-color: #ffb74d; color: #000; }
+        .status-ready { background-color: #757575; color: #fff; }
+        
+        .track-title {
+            font-size: 3em;
+            font-weight: 800;
+            margin: 10px 0;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .track-artist {
+            font-size: 1.8em;
+            color: #b0b0b0;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+        .history-section {
+            text-align: left;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .history-title {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
+            color: #ddd;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-time { color: #666; font-size: 0.9em; }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 230, 118, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="card" class="now-playing-card">
+            <div id="status" class="status-badge status-ready">Ready</div>
+            <div id="source-badge" style="color: #888; font-size: 0.8em; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; display: none;"></div>
+            
+            <div id="artwork-container" class="artwork-container">
+                <img id="artwork" class="artwork-img" src="" alt="Album Art">
+            </div>
+
+            <div id="title" class="track-title">Waiting...</div>
+            <div id="artist" class="track-artist">-</div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">History</div>
+            <div id="history-list">
+                <!-- History items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastArtworkTs = 0;
+
+        function updateDisplay() {
+            fetch('/api/now_playing')
+                .then(response => response.json())
+                .then(data => {
+                    const current = data.current;
+                    
+                    // Update Now Playing
+                    document.getElementById('title').textContent = current.title;
+                    document.getElementById('artist').textContent = current.artist;
+                    
+                    const statusEl = document.getElementById('status');
+                    const cardEl = document.getElementById('card');
+                    const artworkContainer = document.getElementById('artwork-container');
+                    const artworkImg = document.getElementById('artwork');
+                    
+                    statusEl.className = 'status-badge';
+                    cardEl.classList.remove('pulsing');
+                    
+                    if (current.type === 'playing') {
+                        statusEl.textContent = 'ON AIR';
+                        statusEl.classList.add('status-playing');
+                        cardEl.classList.add('pulsing');
+                    } else if (current.type === 'preview') {
+                        statusEl.textContent = 'CUE / PREVIEW';
+                        statusEl.classList.add('status-preview');
+                    } else {
+                        statusEl.textContent = 'READY';
+                        statusEl.classList.add('status-ready');
+                    }
+
+                    // Update Source Badge
+                    const sourceEl = document.getElementById('source-badge');
+                    const showSource = data.settings ? data.settings.show_source : true;
+                    
+                    if (showSource && current.source && current.source !== 'Unknown') {
+                        sourceEl.textContent = current.source;
+                        sourceEl.style.display = 'block';
+                    } else {
+                        sourceEl.style.display = 'none';
+                    }
+
+                    // Update Artwork
+                    if (current.has_artwork) {
+                        artworkContainer.style.display = 'block';
+                        // Only update src if timestamp changed to avoid flickering
+                        if (current.artwork_ts !== lastArtworkTs) {
+                            artworkImg.src = '/cover.jpg?t=' + current.artwork_ts;
+                            lastArtworkTs = current.artwork_ts;
+                        }
+                    } else {
+                        artworkContainer.style.display = 'none';
+                    }
+
+                    // Update History
+                    const historySection = document.querySelector('.history-section');
+                    if (data.settings && !data.settings.show_history) {
+                        historySection.style.display = 'none';
+                    } else {
+                        historySection.style.display = 'block';
+                        const historyList = document.getElementById('history-list');
+                        historyList.innerHTML = '';
+                        data.history.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'history-item';
+                            
+                            let timeHtml = '';
+                            if (data.settings && data.settings.show_history_time) {
+                                timeHtml = `<span class="history-time">${item.timestamp}</span>`;
+                            }
+                            
+                            div.innerHTML = `
+                                <span>${item.artist} - ${item.title}</span>
+                                ${timeHtml}
+                            `;
+                            historyList.appendChild(div);
+                        });
+                    }
+                })
+                .catch(err => console.error('Error fetching data:', err));
+        }
+
+        // Poll every 1 second
+        setInterval(updateDisplay, 1000);
+        updateDisplay();
+    </script>
+</body>
+</html>
