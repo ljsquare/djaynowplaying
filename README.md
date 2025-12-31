@@ -88,7 +88,6 @@ stanzas
 ## Support
 
 If you find this project useful, consider giving it a star or supporting the project.
----
 
 <a name="chinese"></a>
 
