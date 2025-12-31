@@ -88,6 +88,7 @@ stanzas
 ## Support
 
 If you find this project useful, consider giving it a star or supporting the project.
+If you have any custom development requests or other requirements, please contact stanzas1997@gmail.com
 
 <a name="chinese"></a>
 
