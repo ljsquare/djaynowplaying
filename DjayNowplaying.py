@@ -180,15 +180,18 @@ class ArtworkManager:
                     title = decoded[i-1]
                 elif s == 'artist' and i > 0:
                     artist = decoded[i-1]
-                elif s.startswith('file:///'):
+                elif s.startswith('file:///') and file_path == None:  #make sure that only one will be taken
                     file_path = s
             
             if title and artist and file_path:
                 # Decode URL
                 path = urllib.parse.unquote(file_path)
                 if path.startswith('file:///'):
-                    path = path[8:] # Remove file:///
-                path = path.replace('/', '\\')
+                    if sys.platform=="win32": #for windows users 
+                        path = path[8:] # Remove file:///
+                        path = path.replace('/', '\\')
+                    else:
+                        path = path[7:] # Remove file://
                 return (artist, title, path)
         except:
             pass
