@@ -1,1 +1,4 @@
 DjayNowplaying_config.json
+build
+dist
+.DS_Store
