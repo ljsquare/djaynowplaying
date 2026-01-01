@@ -6,6 +6,11 @@
 
 DjayNowplaying is a lightweight "Now Playing" display tool for [djay Pro](https://www.algoriddim.com/djay-pro-windows). It monitors djay Pro's local database to extract current track information and playback history, displaying them via a local web server. It is perfect for OBS streaming or personal use.
 
+## For MacOS
+
+https://github.com/ljsquare/djaynowplaying
+thanks for @ljsquare
+
 ## Features
 
 *   **Real-time Monitoring**: Directly reads `MediaLibrary.db`, no complex API configuration required.
