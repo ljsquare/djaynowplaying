@@ -542,10 +542,15 @@ class MonitorGUI:
             return path
         
         # 2. Check default location
-        user_profile = os.environ.get('USERPROFILE')
+        user_profile = None
         default_path = None
-        if user_profile:
+        if sys.platform=="darwin": #for macOS users 
+            user_profile = os.environ.get('HOME')
+            default_path = os.path.join(user_profile, 'Music', 'djay', 'djay Media Library.djayMediaLibrary', 'MediaLibrary.db')
+        else: 
+            user_profile = os.environ.get('USERPROFILE')
             default_path = os.path.join(user_profile, 'Music', 'djay', 'djay Media Library', 'MediaLibrary.db')
+        if user_profile:
             if os.path.exists(default_path):
                 update_config("db_path", default_path)
                 return default_path
