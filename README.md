@@ -9,7 +9,7 @@ DjayNowplaying is a lightweight "Now Playing" display tool for [djay Pro](https:
 ## For MacOS
 
 https://github.com/ljsquare/djaynowplaying
-thanks for ljsquare
+thanks for @ljsquare
 
 ## Features
 
